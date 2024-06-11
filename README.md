@@ -1,1 +1,0 @@
-# kristapspriede.github.io

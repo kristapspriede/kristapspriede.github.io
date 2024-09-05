@@ -64,19 +64,28 @@ function getToday() {
 }
 
 // Update daily stats
+// Update daily stats with timestamp
 function updateDailyStats() {
   const today = getToday();
+  const now = new Date().toLocaleTimeString(); // Get current time in HH:MM:SS format
   let dailyStats = JSON.parse(localStorage.getItem('dailyStats')) || {};
 
   if (!dailyStats[today]) {
-    dailyStats[today] = { cigarettes: 0, spent: 0 };
+    dailyStats[today] = { cigarettes: 0, spent: 0, timestamps: [] };
+  }
+
+  // Ensure timestamps is an array
+  if (!Array.isArray(dailyStats[today].timestamps)) {
+    dailyStats[today].timestamps = [];
   }
 
   dailyStats[today].cigarettes++;
   dailyStats[today].spent += costPerCigarette;
+  dailyStats[today].timestamps.push(now); // Log the time of cigarette logging
 
   localStorage.setItem('dailyStats', JSON.stringify(dailyStats));
 }
+
 
 // Calculate averages based on daily statistics
 function calculateAverages() {
@@ -103,12 +112,38 @@ function calculateProjectedExpenses() {
 }
 
 // Render graph for cigarettes smoked
+// Utility function to get the dates for the last week
+function getLastWeekData(dailyStats) {
+  const today = new Date();
+  const oneWeekAgo = new Date(today.setDate(today.getDate() - 8));
+  const labels = [];
+  const cigarettesData = [];
+  const moneySpentData = [];
+
+  for (const date in dailyStats) {
+    const dataDate = new Date(date);
+    if (dataDate >= oneWeekAgo) {
+      labels.push(date);
+      cigarettesData.push(dailyStats[date].cigarettes);
+      moneySpentData.push(dailyStats[date].spent);
+    }
+  }
+
+  // Sort by date
+  const sortedIndices = labels.map((_, index) => index).sort((a, b) => new Date(labels[a]) - new Date(labels[b]));
+  return {
+    labels: sortedIndices.map(i => labels[i]),
+    cigarettesData: sortedIndices.map(i => cigarettesData[i]),
+    moneySpentData: sortedIndices.map(i => moneySpentData[i])
+  };
+}
+
+// Render graph for cigarettes smoked
 function renderCigaretteGraph() {
   const ctx = document.getElementById('cigarettesChart').getContext('2d');
   const dailyStats = JSON.parse(localStorage.getItem('dailyStats')) || {};
 
-  const labels = Object.keys(dailyStats);  // Dates
-  const cigarettesData = Object.values(dailyStats).map(stat => stat.cigarettes);  // Cigarettes smoked
+  const { labels, cigarettesData } = getLastWeekData(dailyStats);
 
   // Destroy previous chart if exists
   if (chartInstance) {
@@ -143,8 +178,7 @@ function renderMoneyGraph() {
   const ctx = document.getElementById('moneyChart').getContext('2d');
   const dailyStats = JSON.parse(localStorage.getItem('dailyStats')) || {};
 
-  const labels = Object.keys(dailyStats);  // Dates
-  const moneySpentData = Object.values(dailyStats).map(stat => stat.spent);  // Money spent
+  const { labels, moneySpentData } = getLastWeekData(dailyStats);
 
   // Destroy previous chart if exists
   if (moneyChartInstance) {
@@ -232,6 +266,65 @@ function getRemainingDaysInYear() {
   const diffTime = endOfYear - today;
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
 }
+
+// Function to export data to JSON
+function exportData() {
+  const data = {
+    cigarettesRemaining,
+    totalSpent,
+    costPerCigarette,
+    cigarettesSmokedToday,
+    dailyStats: JSON.parse(localStorage.getItem('dailyStats')) || {}
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cigarette-logging-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Function to import data from JSON
+function importData(file) {
+  const reader = new FileReader();
+  
+  reader.onload = function(event) {
+    const data = JSON.parse(event.target.result);
+
+    // Update local storage and variables with imported data
+    cigarettesRemaining = data.cigarettesRemaining || 0;
+    totalSpent = data.totalSpent || 0;
+    costPerCigarette = data.costPerCigarette || 0;
+    cigarettesSmokedToday = data.cigarettesSmokedToday || 0;
+
+    localStorage.setItem('cigarettesRemaining', cigarettesRemaining);
+    localStorage.setItem('totalSpent', totalSpent);
+    localStorage.setItem('costPerCigarette', costPerCigarette);
+    localStorage.setItem('cigsToday', cigarettesSmokedToday);
+
+    localStorage.setItem('dailyStats', JSON.stringify(data.dailyStats || {}));
+
+    updateDisplay();  // Auto-update both graphs
+  };
+  
+  reader.readAsText(file);
+}
+
+// Add event listeners for export and import buttons
+document.getElementById('export-data').addEventListener('click', exportData);
+
+document.getElementById('import-file').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    importData(file);
+  }
+});
+
+document.getElementById('import-data').addEventListener('click', function() {
+  document.getElementById('import-file').click();  // Trigger file input click
+});
 
 // Initial call to display and render the graphs
 updateDisplay();

@@ -7,6 +7,7 @@
     <title>Cigarette Logging App</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- Chart.js CDN -->
 </head>
 
@@ -21,6 +22,10 @@
 
         <!-- New average daily cigarettes -->
         <p>Average Daily Money Spent: <strong>€<span id="avg-daily-spent"></span></strong></p>
+    </div>
+
+    <div class="container">
+        <p>Time since last recorded cigarette: <strong><span id="timer-since-last-cig"></span></strong></p>
     </div>
 
     <!-- Projected Expenses -->
@@ -52,6 +57,11 @@
         <!-- Money Spent Graph -->
         <h3>Money Spent</h3>
         <canvas id="moneyChart"></canvas>
+    </div>
+
+    <div class="container">
+        <h3>Today's Logged Cigarettes Times</h3>
+        <ul id="cigarettes-times-list"></ul>
     </div>
 
     <!-- Erase Data Button -->

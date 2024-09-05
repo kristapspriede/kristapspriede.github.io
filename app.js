@@ -5,6 +5,8 @@ let moneyChartInstance = null; // To store the chart instance for money spent
 let averageDailyCigarettes = 0;
 let averageDailyMoneySpent = 0;
 
+let timerInterval = null;
+
 // Initial variables
 let cigarettesRemaining = parseInt(localStorage.getItem('cigarettesRemaining')) || 0;
 let totalSpent = parseFloat(localStorage.getItem('totalSpent')) || 0;
@@ -35,6 +37,7 @@ const projectedCigarettes = document.getElementById('projected-cigarettes');
 const projectedCigarettesYear = document.getElementById('projected-cigarettes-year');
 
 // Update display and graph
+// Update display and graph
 function updateDisplay() {
   remainingEl.textContent = cigarettesRemaining;
   spentEl.textContent = totalSpent.toFixed(2);
@@ -55,7 +58,85 @@ function updateDisplay() {
   // Update both graphs
   renderCigaretteGraph();
   renderMoneyGraph();
+
+  // Update today's logged cigarette times
+  updateCigaretteTimesList();
+  
+  // Update timer since last recorded cigarette
+  updateTimer();
 }
+
+
+function updateCigaretteTimesList() {
+  const today = getToday();
+  const dailyStats = JSON.parse(localStorage.getItem('dailyStats')) || {};
+  const timesList = document.getElementById('cigarettes-times-list');
+
+  if (dailyStats[today] && Array.isArray(dailyStats[today].timestamps)) {
+    timesList.innerHTML = dailyStats[today].timestamps.map(time => `<li>${new Date(time).toLocaleTimeString()}</li>`).join('');
+  } else {
+    timesList.innerHTML = '<li>No cigarettes logged today.</li>';
+  }
+}
+
+
+// Update timer since last recorded cigarette
+function updateTimer() {
+  const today = getToday();
+  const dailyStats = JSON.parse(localStorage.getItem('dailyStats')) || {};
+  const timesList = dailyStats[today] && Array.isArray(dailyStats[today].timestamps) ? dailyStats[today].timestamps : [];
+  
+  if (timesList.length > 0) {
+    const lastCigaretteTime = new Date(timesList[timesList.length - 1]);
+
+    // Clear any previous interval before starting a new one
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+
+    // Set up the timer to update every second
+    timerInterval = setInterval(() => {
+      const now = new Date();
+      const elapsed = now - lastCigaretteTime;
+
+      const hours = Math.floor(elapsed / (1000 * 60 * 60));
+      const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+
+      document.getElementById('timer-since-last-cig').textContent = `${hours}h ${minutes}m ${seconds}s ago`;
+    }, 1000); // Update every second
+
+  } else {
+    // Clear the interval if no cigarettes are logged today
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    document.getElementById('timer-since-last-cig').textContent = 'No cigarettes logged today.';
+  }
+}
+
+// Log cigarette button
+logCigaretteBtn.addEventListener('click', () => {
+  if (cigarettesRemaining > 0) {
+    cigarettesRemaining--;
+    cigarettesSmokedToday++;
+    totalSpent += costPerCigarette;
+
+    localStorage.setItem('cigarettesRemaining', cigarettesRemaining);
+    localStorage.setItem('totalSpent', totalSpent);
+    localStorage.setItem('cigsToday', cigarettesSmokedToday);
+
+    updateDailyStats();
+    updateDisplay();  // Auto-update both graphs
+
+    // Reset the timer when a new cigarette is logged
+    updateTimer();
+  } else {
+    alert('No cigarettes left! Log a new pack.');
+  }
+});
+
+
 
 // Get today's date
 function getToday() {
@@ -67,7 +148,6 @@ function getToday() {
 // Update daily stats with timestamp
 function updateDailyStats() {
   const today = getToday();
-  const now = new Date().toLocaleTimeString(); // Get current time in HH:MM:SS format
   let dailyStats = JSON.parse(localStorage.getItem('dailyStats')) || {};
 
   if (!dailyStats[today]) {
@@ -81,7 +161,7 @@ function updateDailyStats() {
 
   dailyStats[today].cigarettes++;
   dailyStats[today].spent += costPerCigarette;
-  dailyStats[today].timestamps.push(now); // Log the time of cigarette logging
+  dailyStats[today].timestamps.push(new Date().toISOString()); // Log the time of cigarette logging
 
   localStorage.setItem('dailyStats', JSON.stringify(dailyStats));
 }

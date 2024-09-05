@@ -10,6 +10,7 @@ let cigarettesRemaining = parseInt(localStorage.getItem('cigarettesRemaining')) 
 let totalSpent = parseFloat(localStorage.getItem('totalSpent')) || 0;
 let costPerCigarette = parseFloat(localStorage.getItem('costPerCigarette')) || 0;
 let cigarettesSmokedToday = parseInt(localStorage.getItem('cigsToday')) || 0;
+let remainingDaysLeft = parseInt(getRemainingDaysInYear()) || 0;
 
 const remainingEl = document.getElementById('cigarettes-remaining');
 const spentEl = document.getElementById('total-spent');
@@ -22,6 +23,7 @@ const logPackBtn = document.getElementById('log-pack');
 const packSizeInput = document.getElementById('pack-size');
 const packCostInput = document.getElementById('pack-cost');
 const eraseDataBtn = document.getElementById('erase-data');
+const remainingDays = document.getElementById('remaining-days');
 
 // Update display and graph
 function updateDisplay() {
@@ -29,6 +31,7 @@ function updateDisplay() {
   spentEl.textContent = totalSpent.toFixed(2);
   costPerCigEl.textContent = costPerCigarette.toFixed(2);
   cigsTodayEl.textContent = cigarettesSmokedToday;
+  remainingDays.textContent = remainingDaysLeft;
 
   calculateAverages();
   avgDailyCigsEl.textContent = averageDailyCigarettes.toFixed(2);
@@ -195,6 +198,13 @@ eraseDataBtn.addEventListener('click', () => {
 
   updateDisplay();  // Auto-update both graphs
 });
+
+function getRemainingDaysInYear() {
+  const today = new Date();
+  const endOfYear = new Date(today.getFullYear(), 11, 31); // December 31 of the current year
+  const diffTime = endOfYear - today;
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
+}
 
 // Initial call to display and render the graphs
 updateDisplay();

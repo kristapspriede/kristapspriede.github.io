@@ -11,6 +11,10 @@ let totalSpent = parseFloat(localStorage.getItem('totalSpent')) || 0;
 let costPerCigarette = parseFloat(localStorage.getItem('costPerCigarette')) || 0;
 let cigarettesSmokedToday = parseInt(localStorage.getItem('cigsToday')) || 0;
 let remainingDaysLeft = parseInt(getRemainingDaysInYear()) || 0;
+let projectedExp = 0;
+let projectedExpYear = 0;
+let projectedCigs = 0;
+let projectedCigsYear = 0;
 
 const remainingEl = document.getElementById('cigarettes-remaining');
 const spentEl = document.getElementById('total-spent');
@@ -23,7 +27,12 @@ const logPackBtn = document.getElementById('log-pack');
 const packSizeInput = document.getElementById('pack-size');
 const packCostInput = document.getElementById('pack-cost');
 const eraseDataBtn = document.getElementById('erase-data');
-const remainingDays = document.getElementById('remaining-days');
+
+// Variables for projected expenses
+const projectedExpenses = document.getElementById('projected-expenses');
+const projectedExpensesYear = document.getElementById('projected-expenses-year');
+const projectedCigarettes = document.getElementById('projected-cigarettes');
+const projectedCigarettesYear = document.getElementById('projected-cigarettes-year');
 
 // Update display and graph
 function updateDisplay() {
@@ -31,11 +40,17 @@ function updateDisplay() {
   spentEl.textContent = totalSpent.toFixed(2);
   costPerCigEl.textContent = costPerCigarette.toFixed(2);
   cigsTodayEl.textContent = cigarettesSmokedToday;
-  remainingDays.textContent = remainingDaysLeft;
 
   calculateAverages();
   avgDailyCigsEl.textContent = averageDailyCigarettes.toFixed(2);
   avgDailySpentEl.textContent = averageDailyMoneySpent.toFixed(2);
+
+  // Calculate projected expenses
+  calculateProjectedExpenses();
+  projectedCigarettes.textContent = projectedCigs.toFixed(2);
+  projectedCigarettesYear.textContent = projectedCigsYear.toFixed(2);
+  projectedExpenses.textContent = projectedExp.toFixed(2);
+  projectedExpensesYear.textContent = projectedExpYear.toFixed(2);
 
   // Update both graphs
   renderCigaretteGraph();
@@ -78,6 +93,13 @@ function calculateAverages() {
     averageDailyCigarettes = 0;
     averageDailyMoneySpent = 0;
   }
+}
+
+function calculateProjectedExpenses() {
+  projectedCigs = averageDailyCigarettes * remainingDaysLeft;
+  projectedCigsYear = averageDailyCigarettes * 365;
+  projectedExp = averageDailyMoneySpent * remainingDaysLeft;
+  projectedExpYear = averageDailyMoneySpent * 365;
 }
 
 // Render graph for cigarettes smoked
@@ -135,7 +157,7 @@ function renderMoneyGraph() {
     data: {
       labels: labels,
       datasets: [{
-        label: 'Money Spent (Є)',
+        label: 'Money Spent (€)',
         data: moneySpentData,
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderColor: 'rgba(255, 99, 132, 1)',
@@ -177,7 +199,12 @@ logPackBtn.addEventListener('click', () => {
 
   if (packSize && packCost) {
     cigarettesRemaining += packSize;
-    costPerCigarette = (costPerCigarette + (packCost / packSize)) / 2;
+    if (costPerCigarette === 0.0) {
+      costPerCigarette = packCost / packSize;
+    } else {
+      costPerCigarette = (costPerCigarette + (packCost / packSize)) / 2;
+    }
+    
 
     localStorage.setItem('cigarettesRemaining', cigarettesRemaining);
     localStorage.setItem('costPerCigarette', costPerCigarette);

@@ -1,51 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cigarette Logging App</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cigarette Logging App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js CDN -->
 </head>
+
 <body>
-  <!-- Display Section -->
-  <div class="container" id="stats">
-    <p>Cigarettes Remaining: <span id="cigarettes-remaining"></span></p>
-    <p>Total Spent: <span id="total-spent"></span></p>
-    <p>Cost per Cigarette: <span id="cost-per-cigarette"></span></p>
-    <p>Cigarettes Smoked Today: <span id="cigs-today"></span></p>
-    <p>Average Daily Cigarettes: <span id="avg-daily-cigs"></span></p> <!-- New average daily cigarettes -->
-    <p>Average Daily Money Spent: <span id="avg-daily-spent"></span></p> <!-- New average daily money spent -->
-    <p>Remining days this year: <span id="remaining-days"></span></p>
-  </div>
+    <!-- Display Section -->
+    <div class="container" id="stats">
+        <p>Cigarettes Remaining: <strong><span id="cigarettes-remaining"></span></strong></p>
+        <p>Total Spent: <strong>€<span id="total-spent"></span></strong></p>
+        <p>Cost per Cigarette: <strong>€<span id="cost-per-cigarette"></span></strong></p>
+        <p>Cigarettes Smoked Today: <strong><span id="cigs-today"></span></strong></p>
+        <p>Average Daily Cigarettes: <strong><span id="avg-daily-cigs"></span></strong></p>
 
-  <!-- Log Cigarette -->
-   <div class="container">
-    <button id="log-cigarette">Log Cigarette</button>
-   </div>
+        <!-- New average daily cigarettes -->
+        <p>Average Daily Money Spent: <strong>€<span id="avg-daily-spent"></span></strong></p>
+    </div>
 
-  <!-- Log Pack -->
-  <div class="container">
-    <input type="number" id="pack-size" placeholder="Pack Size">
-    <input type="number" id="pack-cost" placeholder="Pack Cost">
-    <button id="log-pack">Log Pack</button>
-  </div>
+    <!-- Projected Expenses -->
+    <div class="container expenses">
+        <h3>Projected Expenses</h3>
+        <p>Projected expenses until end of year: <strong>€<span id="projected-expenses"></span></strong></p>
+        <p>Projected expenses in year: <strong>€<span id="projected-expenses-year"></span></strong></p>
+        <p>Projected cigarettes until end of year: <strong><span id="projected-cigarettes"></span></strong></p>
+        <p>Projected cigarettes in year: <strong><span id="projected-cigarettes-year"></span></strong></p>
+    </div>
 
-  <div class="container">
-    <!-- Cigarettes Graph -->
-    <h3>Cigarettes Smoked</h3>
-    <canvas id="cigarettesChart"></canvas>
-  
-    <!-- Money Spent Graph -->
-    <h3>Money Spent</h3>
-    <canvas id="moneyChart"></canvas>
-  </div>
+    <!-- Log Cigarette -->
+    <div class="container">
+        <button id="log-cigarette">Log Cigarette</button>
+    </div>
 
-  <!-- Erase Data Button -->
-  <div class="container">
-    <button id="erase-data">Erase All Data</button>
-  </div>
+    <!-- Log Pack -->
+    <div class="container">
+        <input type="number" id="pack-size" placeholder="Pack Size" />
+        <input type="number" id="pack-cost" placeholder="Pack Cost" />
+        <button id="log-pack">Log Pack</button>
+    </div>
 
-  <script src="app.js"></script>
+    <div class="container">
+        <!-- Cigarettes Graph -->
+        <h3>Cigarettes Smoked</h3>
+        <canvas id="cigarettesChart"></canvas>
+
+        <!-- Money Spent Graph -->
+        <h3>Money Spent</h3>
+        <canvas id="moneyChart"></canvas>
+    </div>
+
+    <!-- Erase Data Button -->
+    <div class="container">
+        <button id="erase-data">Erase All Data</button>
+    </div>
+
+    <script src="app.js"></script>
 </body>
+
 </html>

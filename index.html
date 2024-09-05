@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cigarette Logging App</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+</head>
+<body>
+
+  <!-- Display Section -->
+  <div id="stats">
+    <p>Cigarettes Remaining: <span id="cigarettes-remaining"></span></p>
+    <p>Total Spent: <span id="total-spent"></span></p>
+    <p>Cost per Cigarette: <span id="cost-per-cigarette"></span></p>
+    <p>Cigarettes Smoked Today: <span id="cigs-today"></span></p>
+    <p>Average Daily Cigarettes: <span id="avg-daily-cigs"></span></p> <!-- New average daily cigarettes -->
+    <p>Average Daily Money Spent: <span id="avg-daily-spent"></span></p> <!-- New average daily money spent -->
+  </div>
+
+  <!-- Log Cigarette -->
+  <button id="log-cigarette">Log Cigarette</button>
+
+  <!-- Log Pack -->
+  <div>
+    <input type="number" id="pack-size" placeholder="Pack Size">
+    <input type="number" id="pack-cost" placeholder="Pack Cost">
+    <button id="log-pack">Log Pack</button>
+  </div>
+
+  <!-- Cigarettes Graph -->
+  <h3>Cigarettes Smoked</h3>
+  <canvas id="cigarettesChart"></canvas>
+
+  <!-- Money Spent Graph -->
+  <h3>Money Spent</h3>
+  <canvas id="moneyChart"></canvas>
+
+  <!-- Erase Data Button -->
+  <button id="erase-data">Erase All Data</button>
+
+  <script src="app.js"></script>
+</body>
+</html>

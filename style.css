@@ -1,0 +1,168 @@
+/* Reset some default styles for consistency across browsers */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Body Styling */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+  }
+  
+  /* Container for the App */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Headings */
+  h1, h2, h3 {
+    color: #333333;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+  }
+  
+  h2 {
+    font-size: 1.8em;
+    margin-top: 20px;
+  }
+  
+  h3 {
+    font-size: 1.2em;
+    margin-top: 10px;
+  }
+  
+  /* Sections */
+  .section {
+    margin-bottom: 25px;
+  }
+  
+  /* Buttons */
+  button {
+    padding: 12px 25px;
+    background-color: #007BFF;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  button:active {
+    background-color: #004494;
+  }
+  
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  /* Inputs */
+  input[type="number"] {
+    padding: 10px;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    width: calc(50% - 20px);
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 1em;
+  }
+  
+  input[type="number"]::placeholder {
+    color: #999999;
+  }
+  
+  /* Display Sections */
+  #stats p {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+  }
+  
+  #stats span {
+    font-weight: bold;
+    color: #007BFF;
+  }
+  
+  /* Graph Section */
+  .section canvas {
+    width: 100% !important;
+    max-height: 400px;
+  }
+  
+  /* Erase Data Button */
+  #erase-data {
+    background-color: #dc3545;
+    margin-top: 20px;
+  }
+  
+  #erase-data:hover {
+    background-color: #c82333;
+  }
+  
+  #erase-data:active {
+    background-color: #bd2130;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 20px;
+    }
+  
+    input[type="number"] {
+      width: 100%;
+      margin-right: 0;
+    }
+  
+    button {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+  
+  /* Additional Styling for Better UX */
+  
+  /* Section Titles */
+  .section h2 {
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+  }
+  
+  /* Align Buttons */
+  .button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  /* Margin for Log Pack Inputs */
+  .log-pack-inputs {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  /* Smooth Transitions for Elements */
+  .section, button, input[type="number"] {
+    transition: all 0.3s ease;
+  }
+  

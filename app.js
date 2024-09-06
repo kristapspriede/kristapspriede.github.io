@@ -36,12 +36,23 @@ const elements = {
   projectedCigarettesYear: document.getElementById('projected-cigarettes-year'),
   cigaretteTimesList: document.getElementById('cigarettes-times-list'),
   timerSinceLastCig: document.getElementById('timer-since-last-cig'),
-  longestNonSmokingTimeEl: document.getElementById('longest-non-smoking-time')
+  longestNonSmokingTimeEl: document.getElementById('longest-non-smoking-time'),
+  exportDataBtn: document.getElementById('export-data'),
+  importDataBtn: document.getElementById('import-data'),
+  importDataInput: document.getElementById('import-data-input')
 };
 
 // Utility Functions
 function getFromLocalStorage(key, defaultValue) {
   return JSON.parse(localStorage.getItem(key)) || defaultValue;
+}
+
+function safeAddEventListener(element, event, handler) {
+  if (element) {
+    element.addEventListener(event, handler);
+  } else {
+    console.warn(`Element not found for event: ${event}`);
+  }
 }
 
 function updateLocalStorage(key, value) {
@@ -302,6 +313,70 @@ function getRemainingDaysInYear() {
   const endOfYear = new Date(today.getFullYear(), 11, 31);
   return Math.ceil((endOfYear - today) / (1000 * 60 * 60 * 24));
 }
+
+// Export Data
+function exportData() {
+  const data = {
+    cigarettesRemaining,
+    totalSpent,
+    costPerCigarette,
+    longestNonSmokingTime,
+    dailyStats: getFromLocalStorage('dailyStats', {})
+  };
+
+  const dataStr = JSON.stringify(data);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+  const exportFileDefaultName = 'cigarette_tracker_data.json';
+
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+}
+
+// Import Data
+function importData(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        
+        cigarettesRemaining = data.cigarettesRemaining;
+        totalSpent = data.totalSpent;
+        costPerCigarette = data.costPerCigarette;
+        longestNonSmokingTime = data.longestNonSmokingTime;
+
+        updateLocalStorage('cigarettesRemaining', cigarettesRemaining);
+        updateLocalStorage('totalSpent', totalSpent);
+        updateLocalStorage('costPerCigarette', costPerCigarette);
+        updateLocalStorage('longestNonSmokingTime', longestNonSmokingTime);
+        updateLocalStorage('dailyStats', data.dailyStats);
+
+        updateDisplay();
+        alert('Data imported successfully!');
+      } catch (error) {
+        console.error('Error importing data:', error);
+        alert('Error importing data. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
+// Event Listeners
+safeAddEventListener(elements.logCigaretteBtn, 'click', logCigarette);
+safeAddEventListener(elements.logPackBtn, 'click', logPack);
+safeAddEventListener(elements.eraseDataBtn, 'click', eraseData);
+safeAddEventListener(elements.exportDataBtn, 'click', exportData);
+safeAddEventListener(elements.importDataInput, 'change', importData);
+
+// Trigger file input when import button is clicked
+safeAddEventListener(elements.importDataBtn, 'click', () => {
+  elements.importDataInput?.click();
+});
 
 // Initial Display Update
 updateDisplay();

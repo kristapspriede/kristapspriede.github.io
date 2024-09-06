@@ -2,6 +2,7 @@
 let chartInstance = null;
 let moneyChartInstance = null;
 let timerInterval = null;
+let longestNonSmokingTime = getFromLocalStorage('longestNonSmokingTime', 0);
 
 // Local Storage Variables
 let cigarettesRemaining = getFromLocalStorage('cigarettesRemaining', 0);
@@ -34,7 +35,8 @@ const elements = {
   projectedCigarettes: document.getElementById('projected-cigarettes'),
   projectedCigarettesYear: document.getElementById('projected-cigarettes-year'),
   cigaretteTimesList: document.getElementById('cigarettes-times-list'),
-  timerSinceLastCig: document.getElementById('timer-since-last-cig')
+  timerSinceLastCig: document.getElementById('timer-since-last-cig'),
+  longestNonSmokingTimeEl: document.getElementById('longest-non-smoking-time')
 };
 
 // Utility Functions
@@ -56,13 +58,14 @@ function updateDisplay() {
   renderGraphs();
   updateCigaretteTimesList();
   updateTimer();
+  updateLongestNonSmokingTime();
 }
 
 function updateBasicInfo() {
   elements.remainingEl.textContent = cigarettesRemaining;
   elements.spentEl.textContent = totalSpent.toFixed(2);
   elements.costPerCigEl.textContent = costPerCigarette.toFixed(2);
-  elements.cigsTodayEl.textContent = cigarettesSmokedToday;
+  elements.cigsTodayEl.textContent = getCigarettesSmokedToday();
 }
 
 function updateAveragesDisplay() {
@@ -79,18 +82,24 @@ function updateProjectionsDisplay() {
 
 function calculateAverages() {
   const dailyStats = getFromLocalStorage('dailyStats', {});
-  const daysLogged = Object.keys(dailyStats).length;
-
-  if (daysLogged > 0) {
-    const totalCigarettes = Object.values(dailyStats).reduce((sum, stat) => sum + stat.cigarettes, 0);
-    const totalMoneySpent = Object.values(dailyStats).reduce((sum, stat) => sum + stat.spent, 0);
-
-    averageDailyCigarettes = totalCigarettes / daysLogged;
-    averageDailyMoneySpent = totalMoneySpent / daysLogged;
-  } else {
+  const days = Object.keys(dailyStats);
+  
+  if (days.length === 0) {
     averageDailyCigarettes = 0;
     averageDailyMoneySpent = 0;
+    return;
   }
+
+  let totalCigarettes = 0;
+  let totalSpent = 0;
+
+  days.forEach(day => {
+    totalCigarettes += dailyStats[day].cigarettes;
+    totalSpent += dailyStats[day].spent;
+  });
+
+  averageDailyCigarettes = totalCigarettes / days.length;
+  averageDailyMoneySpent = totalSpent / days.length;
 }
 
 function calculateProjectedExpenses() {
@@ -109,6 +118,7 @@ function updateTimer() {
     timerInterval = setInterval(() => {
       const elapsed = Date.now() - lastCigaretteTime;
       displayElapsedTime(elapsed);
+      updateLongestNonSmokingTime(elapsed);
     }, 1000);
   } else {
     elements.timerSinceLastCig.textContent = 'No cigarettes logged today.';
@@ -121,6 +131,12 @@ function getLastCigaretteTime() {
   return dailyStats[today]?.timestamps?.length > 0 ? new Date(dailyStats[today].timestamps.slice(-1)[0]).getTime() : null;
 }
 
+function getCigarettesSmokedToday() {
+  const today = getToday();
+  const dailyStats = getFromLocalStorage('dailyStats', {});
+  return dailyStats[today]?.cigarettes || 0;
+}
+
 function displayElapsedTime(elapsed) {
   const hours = Math.floor(elapsed / (1000 * 60 * 60));
   const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
@@ -129,13 +145,34 @@ function displayElapsedTime(elapsed) {
   elements.timerSinceLastCig.textContent = `${hours}h ${minutes}m ${seconds}s ago`;
 }
 
+function updateLongestNonSmokingTime() {
+  const lastCigaretteTime = getLastCigaretteTime();
+  if (!lastCigaretteTime) return;
+
+  const currentNonSmokingTime = Date.now() - lastCigaretteTime;
+  if (currentNonSmokingTime > longestNonSmokingTime) {
+    longestNonSmokingTime = currentNonSmokingTime;
+    updateLocalStorage('longestNonSmokingTime', longestNonSmokingTime);
+  }
+  displayLongestNonSmokingTime();
+}
+
+function displayLongestNonSmokingTime() {
+  const hours = Math.floor(longestNonSmokingTime / (1000 * 60 * 60));
+  const minutes = Math.floor((longestNonSmokingTime % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((longestNonSmokingTime % (1000 * 60)) / 1000);
+
+  elements.longestNonSmokingTimeEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
+}
+
 function updateCigaretteTimesList() {
   const today = getToday();
   const dailyStats = getFromLocalStorage('dailyStats', {});
   const timestamps = dailyStats[today]?.timestamps || [];
 
-  elements.cigaretteTimesList.innerHTML = timestamps.length
-    ? timestamps.map(time => `<li>${new Date(time).toLocaleTimeString()}</li>`).join('')
+  let lastFiveTimestamps = timestamps.slice(-5).reverse();
+  elements.cigaretteTimesList.innerHTML = lastFiveTimestamps.length
+    ? lastFiveTimestamps.map(time => `<li>${new Date(time).toLocaleTimeString()}</li>`).join('')
     : '<li>No cigarettes logged today.</li>';
 }
 
@@ -147,10 +184,11 @@ elements.eraseDataBtn.addEventListener('click', eraseData);
 function logCigarette() {
   if (cigarettesRemaining > 0) {
     cigarettesRemaining--;
-    cigarettesSmokedToday++;
     totalSpent += costPerCigarette;
 
+    updateLongestNonSmokingTime();
     saveLoggingData();
+    updateDailyStats(true);
     updateDisplay();
   } else {
     alert('No cigarettes left! Log a new pack.');
@@ -185,14 +223,19 @@ function eraseData() {
 }
 
 // Daily Statistics
-function updateDailyStats() {
+function updateDailyStats(incrementCigarettes = false) {
   const today = getToday();
   const dailyStats = getFromLocalStorage('dailyStats', {});
 
-  dailyStats[today] = dailyStats[today] || { cigarettes: 0, spent: 0, timestamps: [] };
-  dailyStats[today].cigarettes++;
-  dailyStats[today].spent += costPerCigarette;
-  dailyStats[today].timestamps.push(new Date().toISOString());
+  if (!dailyStats[today]) {
+    dailyStats[today] = { cigarettes: 0, spent: 0, timestamps: [] };
+  }
+
+  if (incrementCigarettes) {
+    dailyStats[today].cigarettes++;
+    dailyStats[today].spent += costPerCigarette;
+    dailyStats[today].timestamps.push(new Date().toISOString());
+  }
 
   updateLocalStorage('dailyStats', dailyStats);
 }

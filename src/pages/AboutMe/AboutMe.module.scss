@@ -1,0 +1,19 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aboutme {
+    width: 50%;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .aboutme {
+        width: 100%;
+        padding: 20px;
+    }
+    
+}
